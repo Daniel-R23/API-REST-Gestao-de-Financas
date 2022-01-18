@@ -39,4 +39,10 @@ public class ReceitaController {
         return receitaService.detalhar(id);
     }
 
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<ReceitaDTO> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaDTO receitaDTO, UriComponentsBuilder uriBuilder){
+        return receitaService.atualizar(id, receitaDTO, uriBuilder);
+    }
+
 }

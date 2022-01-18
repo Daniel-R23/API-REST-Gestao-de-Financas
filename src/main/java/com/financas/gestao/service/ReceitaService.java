@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +21,7 @@ public class ReceitaService {
 
     public ResponseEntity<ReceitaDTO> cadastrar(ReceitaDTO receitaDTO, UriComponentsBuilder uriBuilder) throws ReceitaJaCadastradaException {
         verificaSeJaExiste(receitaDTO);
-        Receita receita = receitaDTO.toReceita();
+        Receita receita = receitaDTO.converter();
         repository.save(receita);
         URI uri  = uriBuilder.path("/receitas/{id}").buildAndExpand(receita.getId()).toUri();
         return ResponseEntity.created(uri).body(new ReceitaDTO(receita));
@@ -30,12 +29,21 @@ public class ReceitaService {
 
     public List<ReceitaDTO> listar() {
         List<Receita> receitas = repository.findAll();
-        return ReceitaDTO.converter(receitas);
+        return ReceitaDTO.converterLista(receitas);
     }
 
     public ResponseEntity<ReceitaDTO> detalhar(Long id) {
         Optional<Receita> receitaOptional = repository.findById(id);
         return receitaOptional.map(receita -> ResponseEntity.ok(new ReceitaDTO(receita))).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    public ResponseEntity<ReceitaDTO> atualizar(Long id, ReceitaDTO receitaDTO, UriComponentsBuilder uriBuilder) {
+        Optional<Receita> receitaOptional = repository.findById(id);
+        if(receitaOptional.isPresent()){
+            Receita receita = receitaDTO.atualizar(id, repository);
+            return ResponseEntity.ok(new ReceitaDTO(receita));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     private void verificaSeJaExiste(ReceitaDTO receita) throws ReceitaJaCadastradaException {
