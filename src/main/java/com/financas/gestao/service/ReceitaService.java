@@ -46,6 +46,15 @@ public class ReceitaService {
         return ResponseEntity.notFound().build();
     }
 
+    public ResponseEntity<?> deletar(Long id) {
+        Optional<Receita> receitaOptional = repository.findById(id);
+        if(receitaOptional.isPresent()){
+            repository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     private void verificaSeJaExiste(ReceitaDTO receita) throws ReceitaJaCadastradaException {
         Optional<Receita> receitaEncontrada = repository.findByDescricaoAndData(receita.getDescricao(), receita.getData());
         if(receitaEncontrada.isPresent()) {

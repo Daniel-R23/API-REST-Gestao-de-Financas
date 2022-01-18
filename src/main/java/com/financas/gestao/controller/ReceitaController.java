@@ -45,4 +45,10 @@ public class ReceitaController {
         return receitaService.atualizar(id, receitaDTO, uriBuilder);
     }
 
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> deletar(@PathVariable Long id){
+        return receitaService.deletar(id);
+    }
+
 }
