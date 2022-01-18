@@ -1,22 +1,39 @@
 package com.financas.gestao.dto;
 
-import com.sun.istack.NotNull;
+import com.financas.gestao.model.Receita;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
-
+@Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReceitaDTO {
 
-    @NotNull @NotEmpty
+    @NotNull
+    @NotEmpty
     private String descricao;
 
-    @NotNull @NotEmpty
+
+    @NotNull
     private Double valor;
 
-    @NotNull @NotEmpty
+    @NotNull
     private LocalDate data;
 
+    public ReceitaDTO(Receita receita) {
+        this.descricao = receita.getDescricao();
+        this.valor = receita.getValor();
+        this.data = receita.getData();
+    }
+
+    public Receita toReceita() {
+        return new Receita(descricao,valor,data);
+    }
 }
