@@ -11,7 +11,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -23,7 +22,6 @@ public class ReceitaDTO {
     @NotNull
     @NotEmpty
     private String descricao;
-
 
     @NotNull
     private Double valor;

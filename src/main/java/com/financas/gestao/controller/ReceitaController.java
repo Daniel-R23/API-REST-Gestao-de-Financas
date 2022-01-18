@@ -41,8 +41,8 @@ public class ReceitaController {
 
     @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity<ReceitaDTO> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaDTO receitaDTO, UriComponentsBuilder uriBuilder){
-        return receitaService.atualizar(id, receitaDTO, uriBuilder);
+    public ResponseEntity<ReceitaDTO> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaDTO receitaDTO){
+        return receitaService.atualizar(id, receitaDTO);
     }
 
     @DeleteMapping("/{id}")

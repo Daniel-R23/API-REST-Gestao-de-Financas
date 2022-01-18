@@ -1,5 +1,6 @@
 package com.financas.gestao.config.validacao;
 
+import com.financas.gestao.exception.DespesaJaCadastradaException;
 import com.financas.gestao.exception.ReceitaJaCadastradaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -34,8 +35,17 @@ public class ErroDeValidacaoHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ReceitaJaCadastradaException.class)
+    @ExceptionHandler(value = ReceitaJaCadastradaException.class)
     public List<ErroDeFormularioDTO> handle(ReceitaJaCadastradaException exception){
+        List<ErroDeFormularioDTO> erros = new ArrayList<>();
+        String mensagem = messageSource.getMessage(exception, LocaleContextHolder.getLocale());
+        ErroDeFormularioDTO erro = new ErroDeFormularioDTO("Descrição", mensagem);
+        erros.add(erro);
+        return erros;
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = DespesaJaCadastradaException.class)
+    public List<ErroDeFormularioDTO> handle(DespesaJaCadastradaException exception){
         List<ErroDeFormularioDTO> erros = new ArrayList<>();
         String mensagem = messageSource.getMessage(exception, LocaleContextHolder.getLocale());
         ErroDeFormularioDTO erro = new ErroDeFormularioDTO("Descrição", mensagem);

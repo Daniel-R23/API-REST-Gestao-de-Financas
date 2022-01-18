@@ -37,7 +37,7 @@ public class ReceitaService {
         return receitaOptional.map(receita -> ResponseEntity.ok(new ReceitaDTO(receita))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    public ResponseEntity<ReceitaDTO> atualizar(Long id, ReceitaDTO receitaDTO, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<ReceitaDTO> atualizar(Long id, ReceitaDTO receitaDTO) {
         Optional<Receita> receitaOptional = repository.findById(id);
         if(receitaOptional.isPresent()){
             Receita receita = receitaDTO.atualizar(id, repository);
