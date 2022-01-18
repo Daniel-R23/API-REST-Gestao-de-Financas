@@ -11,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.time.Month;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,6 +26,11 @@ public class ReceitaService {
         repository.save(receita);
         URI uri  = uriBuilder.path("/receitas/{id}").buildAndExpand(receita.getId()).toUri();
         return ResponseEntity.created(uri).body(new ReceitaDTO(receita));
+    }
+
+    public List<ReceitaDTO> listar() {
+        List<Receita> receitas = repository.findAll();
+        return ReceitaDTO.converter(receitas);
     }
 
     private void verificaSeJaExiste(ReceitaDTO receita) throws ReceitaJaCadastradaException {

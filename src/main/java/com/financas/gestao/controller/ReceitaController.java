@@ -6,13 +6,11 @@ import com.financas.gestao.repository.ReceitaRepository;
 import com.financas.gestao.service.ReceitaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/receitas")
@@ -27,6 +25,11 @@ public class ReceitaController {
     @PostMapping
     public ResponseEntity<ReceitaDTO> cadastrar(@RequestBody @Valid ReceitaDTO receitaDTO, UriComponentsBuilder uriBuilder) throws ReceitaJaCadastradaException {
         return receitaService.cadastrar(receitaDTO, uriBuilder);
+    }
+
+    @GetMapping
+    public List<ReceitaDTO> listar(){
+        return receitaService.listar();
     }
 
 }

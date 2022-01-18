@@ -9,6 +9,8 @@ import lombok.Setter;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -32,6 +34,11 @@ public class ReceitaDTO {
         this.valor = receita.getValor();
         this.data = receita.getData();
     }
+
+    public static List<ReceitaDTO> converter(List<Receita> receitas) {
+        return receitas.stream().map(ReceitaDTO::new).collect(Collectors.toList());
+    }
+
 
     public Receita toReceita() {
         return new Receita(descricao,valor,data);
