@@ -33,6 +33,11 @@ public class ReceitaService {
         return ReceitaDTO.converter(receitas);
     }
 
+    public ResponseEntity<ReceitaDTO> detalhar(Long id) {
+        Optional<Receita> receitaOptional = repository.findById(id);
+        return receitaOptional.map(receita -> ResponseEntity.ok(new ReceitaDTO(receita))).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     private void verificaSeJaExiste(ReceitaDTO receita) throws ReceitaJaCadastradaException {
         Optional<Receita> receitaEncontrada = repository.findByDescricaoAndData(receita.getDescricao(), receita.getData());
         if(receitaEncontrada.isPresent()) {

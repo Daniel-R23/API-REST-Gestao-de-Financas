@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class ReceitaController {
 
 
     @PostMapping
+    @Transactional
     public ResponseEntity<ReceitaDTO> cadastrar(@RequestBody @Valid ReceitaDTO receitaDTO, UriComponentsBuilder uriBuilder) throws ReceitaJaCadastradaException {
         return receitaService.cadastrar(receitaDTO, uriBuilder);
     }
@@ -30,6 +32,11 @@ public class ReceitaController {
     @GetMapping
     public List<ReceitaDTO> listar(){
         return receitaService.listar();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ReceitaDTO> detalhar(@PathVariable Long id){
+        return receitaService.detalhar(id);
     }
 
 }

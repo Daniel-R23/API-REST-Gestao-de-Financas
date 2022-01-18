@@ -39,7 +39,6 @@ public class ReceitaDTO {
         return receitas.stream().map(ReceitaDTO::new).collect(Collectors.toList());
     }
 
-
     public Receita toReceita() {
         return new Receita(descricao,valor,data);
     }
