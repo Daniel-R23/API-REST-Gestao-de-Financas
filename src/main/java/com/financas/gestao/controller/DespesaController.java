@@ -1,8 +1,9 @@
 package com.financas.gestao.controller;
 
 import com.financas.gestao.dto.DespesaDTO;
+import com.financas.gestao.dto.DespesaForm;
 import com.financas.gestao.exception.DespesaJaCadastradaException;
-import com.financas.gestao.repository.ReceitaRepository;
+import com.financas.gestao.repository.DespesaRepository;
 import com.financas.gestao.service.DespesaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,15 @@ import java.util.List;
 public class DespesaController {
 
     @Autowired
-    ReceitaRepository repository;
+    DespesaRepository repository;
     @Autowired
     DespesaService despesaService;
 
 
     @PostMapping
     @Transactional
-    public ResponseEntity<DespesaDTO> cadastrar(@RequestBody @Valid DespesaDTO despesaDTO, UriComponentsBuilder uriBuilder) throws DespesaJaCadastradaException {
-        return despesaService.cadastrar(despesaDTO, uriBuilder);
+    public ResponseEntity<DespesaDTO> cadastrar(@RequestBody @Valid DespesaForm despesaForm, UriComponentsBuilder uriBuilder) throws DespesaJaCadastradaException {
+        return despesaService.cadastrar(despesaForm, uriBuilder);
     }
 
     @GetMapping
@@ -35,14 +36,14 @@ public class DespesaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DespesaDTO> detalhar(@PathVariable Long id){
+    public ResponseEntity<DespesaForm> detalhar(@PathVariable Long id){
         return despesaService.detalhar(id);
     }
 
     @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity<DespesaDTO> atualizar(@PathVariable Long id, @RequestBody @Valid DespesaDTO despesaDTO){
-        return despesaService.atualizar(id, despesaDTO);
+    public ResponseEntity<DespesaForm> atualizar(@PathVariable Long id, @RequestBody @Valid DespesaForm despesaForm){
+        return despesaService.atualizar(id, despesaForm);
     }
 
     @DeleteMapping("/{id}")

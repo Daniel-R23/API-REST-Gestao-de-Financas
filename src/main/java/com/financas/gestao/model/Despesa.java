@@ -1,5 +1,6 @@
 package com.financas.gestao.model;
 
+import com.financas.gestao.enums.Categoria;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,9 +27,12 @@ public class Despesa {
 
     private LocalDate data;
 
-    public Despesa(String descricao, Double valor, LocalDate data) {
+    private Categoria categoria;
+
+    public Despesa(String descricao, Double valor, LocalDate data, Categoria categoria) {
         this.descricao = descricao;
         this.valor = valor;
         this.data = data;
+        this.categoria = categoria;
     }
 }

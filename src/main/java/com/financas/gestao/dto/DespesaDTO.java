@@ -1,7 +1,6 @@
 package com.financas.gestao.dto;
 
 import com.financas.gestao.model.Despesa;
-import com.financas.gestao.repository.DespesaRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,18 +36,5 @@ public class DespesaDTO {
 
     public static List<DespesaDTO> converterLista(List<Despesa> despesas) {
         return despesas.stream().map(DespesaDTO::new).collect(Collectors.toList());
-    }
-
-    public Despesa converter() {
-        return new Despesa(descricao,valor,data);
-    }
-
-    public Despesa atualizar(Long id, DespesaRepository repository) {
-        Despesa despesa = repository.findById(id).get();
-        despesa.setDescricao(this.descricao);
-        despesa.setValor(this.valor);
-        despesa.setData(this.data);
-
-        return despesa;
     }
 }

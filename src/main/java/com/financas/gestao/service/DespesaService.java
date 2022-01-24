@@ -1,6 +1,7 @@
 package com.financas.gestao.service;
 
 import com.financas.gestao.dto.DespesaDTO;
+import com.financas.gestao.dto.DespesaForm;
 import com.financas.gestao.exception.DespesaJaCadastradaException;
 import com.financas.gestao.model.Despesa;
 import com.financas.gestao.repository.DespesaRepository;
@@ -19,11 +20,11 @@ public class DespesaService {
     @Autowired
     DespesaRepository repository;
 
-    public ResponseEntity<DespesaDTO> cadastrar(DespesaDTO despesaDTO, UriComponentsBuilder uriBuilder) throws DespesaJaCadastradaException {
-        verificaSeJaExiste(despesaDTO);
-        Despesa despesa = despesaDTO.converter();
+    public ResponseEntity<DespesaDTO> cadastrar(DespesaForm despesaForm, UriComponentsBuilder uriBuilder) throws DespesaJaCadastradaException {
+        verificaSeJaExiste(despesaForm);
+        Despesa despesa = despesaForm.converter();
         repository.save(despesa);
-        URI uri  = uriBuilder.path("/receitas/{id}").buildAndExpand(despesa.getId()).toUri();
+        URI uri  = uriBuilder.path("/despesas/{id}").buildAndExpand(despesa.getId()).toUri();
         return ResponseEntity.created(uri).body(new DespesaDTO(despesa));
     }
 
@@ -32,16 +33,16 @@ public class DespesaService {
         return DespesaDTO.converterLista(despesas);
     }
 
-    public ResponseEntity<DespesaDTO> detalhar(Long id) {
+    public ResponseEntity<DespesaForm> detalhar(Long id) {
         Optional<Despesa> despesaOptional = repository.findById(id);
-        return despesaOptional.map(despesa -> ResponseEntity.ok(new DespesaDTO(despesa))).orElseGet(() -> ResponseEntity.notFound().build());
+        return despesaOptional.map(despesa -> ResponseEntity.ok(new DespesaForm(despesa))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    public ResponseEntity<DespesaDTO> atualizar(Long id, DespesaDTO despesaDTO) {
+    public ResponseEntity<DespesaForm> atualizar(Long id, DespesaForm despesaForm) {
         Optional<Despesa> despesaOptional = repository.findById(id);
         if(despesaOptional.isPresent()){
-            Despesa despesa = despesaDTO.atualizar(id, repository);
-            return ResponseEntity.ok(new DespesaDTO(despesa));
+            Despesa despesa = despesaForm.atualizar(id, repository);
+            return ResponseEntity.ok(new DespesaForm(despesa));
         }
         return ResponseEntity.notFound().build();
     }
@@ -55,7 +56,7 @@ public class DespesaService {
         return ResponseEntity.notFound().build();
     }
 
-    private void verificaSeJaExiste(DespesaDTO despesa) throws DespesaJaCadastradaException {
+    private void verificaSeJaExiste(DespesaForm despesa) throws DespesaJaCadastradaException {
         Optional<Despesa> despesaEncontrada = repository.findByDescricaoAndData(despesa.getDescricao(), despesa.getData());
         if(despesaEncontrada.isPresent()) {
             throw new DespesaJaCadastradaException();
