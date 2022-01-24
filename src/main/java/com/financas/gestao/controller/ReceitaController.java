@@ -2,7 +2,6 @@ package com.financas.gestao.controller;
 
 import com.financas.gestao.dto.ReceitaDTO;
 import com.financas.gestao.exception.ReceitaJaCadastradaException;
-import com.financas.gestao.repository.ReceitaRepository;
 import com.financas.gestao.service.ReceitaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +34,11 @@ public class ReceitaController {
     @GetMapping("/{id}")
     public ResponseEntity<ReceitaDTO> detalhar(@PathVariable Long id){
         return receitaService.detalhar(id);
+    }
+
+    @GetMapping("/{ano}/{mes}")
+    public List<ReceitaDTO> listarPorMes(@PathVariable Long ano, @PathVariable Long mes){
+        return  receitaService.listarPorMes(ano,mes);
     }
 
     @PutMapping("/{id}")

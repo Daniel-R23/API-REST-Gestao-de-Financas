@@ -7,10 +7,10 @@ import com.financas.gestao.repository.ReceitaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +59,19 @@ public class ReceitaService {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+
+    public List<ReceitaDTO> listarPorMes(Long ano, Long mes) {
+        List<Receita> receitasPorAno = repository.findByDataContaining(ano);
+        List<Receita> receitasPorAnoEMes = new ArrayList<>();
+        receitasPorAno.forEach(receita -> {
+            if(receita.getData().getMonthValue() == mes){
+                receitasPorAnoEMes.add(receita);
+            }
+        });
+
+        return ReceitaDTO.converterLista(receitasPorAnoEMes);
     }
 
     private void verificaSeJaExiste(ReceitaDTO receita) throws ReceitaJaCadastradaException {

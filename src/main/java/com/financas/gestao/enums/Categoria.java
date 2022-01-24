@@ -1,5 +1,12 @@
 package com.financas.gestao.enums;
 
 public enum Categoria {
-    ALIMENTAÇÃO, SAÚDE, MORADIA, TRANSPORTE, EDUCAÇÃO, LAZER, IMPREVISTOS, OUTRAS
+    ALIMENTACAO,
+    SAUDE,
+    MORADIA,
+    TRANSPORTE,
+    EDUCACAO,
+    LAZER,
+    IMPREVISTOS,
+    OUTRAS
 }
