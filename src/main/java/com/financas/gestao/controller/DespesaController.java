@@ -19,8 +19,6 @@ import java.util.List;
 public class DespesaController {
 
     @Autowired
-    DespesaRepository repository;
-    @Autowired
     DespesaService despesaService;
 
 

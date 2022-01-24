@@ -7,6 +7,7 @@ import com.financas.gestao.repository.ReceitaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -27,9 +28,15 @@ public class ReceitaService {
         return ResponseEntity.created(uri).body(new ReceitaDTO(receita));
     }
 
-    public List<ReceitaDTO> listar() {
-        List<Receita> receitas = repository.findAll();
-        return ReceitaDTO.converterLista(receitas);
+    public List<ReceitaDTO> listar(String descricao) {
+        if(descricao == null){
+            List<Receita> receitas = repository.findAll();
+            return ReceitaDTO.converterLista(receitas);
+        }else{
+            System.out.println("Tem conteudo");
+            List<Receita> receitas = repository.findByDescricaoContainingIgnoreCase(descricao);
+            return ReceitaDTO.converterLista(receitas);
+        }
     }
 
     public ResponseEntity<ReceitaDTO> detalhar(Long id) {

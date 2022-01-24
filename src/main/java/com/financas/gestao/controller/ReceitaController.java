@@ -18,8 +18,6 @@ import java.util.List;
 public class ReceitaController {
 
     @Autowired
-    ReceitaRepository repository;
-    @Autowired
     ReceitaService receitaService;
 
 
@@ -30,8 +28,8 @@ public class ReceitaController {
     }
 
     @GetMapping
-    public List<ReceitaDTO> listar(){
-        return receitaService.listar();
+    public List<ReceitaDTO> listar(@RequestParam(required = false) String descricao){
+        return receitaService.listar(descricao);
     }
 
     @GetMapping("/{id}")
