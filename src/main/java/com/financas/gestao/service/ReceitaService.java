@@ -61,7 +61,6 @@ public class ReceitaService {
         return ResponseEntity.notFound().build();
     }
 
-
     public List<ReceitaDTO> listarPorMes(Long ano, Long mes) {
         List<Receita> receitasPorAno = repository.findByDataContaining(ano);
         List<Receita> receitasPorAnoEMes = new ArrayList<>();

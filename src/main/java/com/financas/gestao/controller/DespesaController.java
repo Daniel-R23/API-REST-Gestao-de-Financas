@@ -2,6 +2,7 @@ package com.financas.gestao.controller;
 
 import com.financas.gestao.dto.DespesaDTO;
 import com.financas.gestao.dto.DespesaForm;
+import com.financas.gestao.dto.ReceitaDTO;
 import com.financas.gestao.exception.DespesaJaCadastradaException;
 import com.financas.gestao.repository.DespesaRepository;
 import com.financas.gestao.service.DespesaService;
@@ -36,6 +37,11 @@ public class DespesaController {
     @GetMapping("/{id}")
     public ResponseEntity<DespesaForm> detalhar(@PathVariable Long id){
         return despesaService.detalhar(id);
+    }
+
+    @GetMapping("/{ano}/{mes}")
+    public List<DespesaDTO> listarPorMes(@PathVariable Long ano, @PathVariable Long mes){
+        return  despesaService.listarPorMes(ano,mes);
     }
 
     @PutMapping("/{id}")

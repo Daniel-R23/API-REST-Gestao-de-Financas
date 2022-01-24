@@ -2,8 +2,10 @@ package com.financas.gestao.service;
 
 import com.financas.gestao.dto.DespesaDTO;
 import com.financas.gestao.dto.DespesaForm;
+import com.financas.gestao.dto.ReceitaDTO;
 import com.financas.gestao.exception.DespesaJaCadastradaException;
 import com.financas.gestao.model.Despesa;
+import com.financas.gestao.model.Receita;
 import com.financas.gestao.repository.DespesaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +62,18 @@ public class DespesaService {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    public List<DespesaDTO> listarPorMes(Long ano, Long mes) {
+        List<Despesa> despesasPorAno = repository.findByDataContaining(ano);
+        List<Despesa> despesasPorAnoEMes = new ArrayList<>();
+        despesasPorAno.forEach(despesa -> {
+            if(despesa.getData().getMonthValue() == mes){
+                despesasPorAnoEMes.add(despesa);
+            }
+        });
+
+        return DespesaDTO.converterLista(despesasPorAnoEMes);
     }
 
     private void verificaSeJaExiste(DespesaForm despesa) throws DespesaJaCadastradaException {
