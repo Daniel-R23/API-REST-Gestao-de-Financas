@@ -29,8 +29,8 @@ public class DespesaController {
     }
 
     @GetMapping
-    public List<DespesaDTO> listar(){
-        return despesaService.listar();
+    public List<DespesaDTO> listar(@RequestParam(required = false) String descricao){
+        return despesaService.listar(descricao);
     }
 
     @GetMapping("/{id}")

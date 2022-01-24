@@ -33,7 +33,6 @@ public class ReceitaService {
             List<Receita> receitas = repository.findAll();
             return ReceitaDTO.converterLista(receitas);
         }else{
-            System.out.println("Tem conteudo");
             List<Receita> receitas = repository.findByDescricaoContainingIgnoreCase(descricao);
             return ReceitaDTO.converterLista(receitas);
         }

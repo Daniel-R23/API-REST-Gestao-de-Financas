@@ -28,9 +28,14 @@ public class DespesaService {
         return ResponseEntity.created(uri).body(new DespesaDTO(despesa));
     }
 
-    public List<DespesaDTO> listar() {
-        List<Despesa> despesas = repository.findAll();
-        return DespesaDTO.converterLista(despesas);
+    public List<DespesaDTO> listar(String descricao) {
+        if(descricao == null) {
+            List<Despesa> despesas = repository.findAll();
+            return DespesaDTO.converterLista(despesas);
+        }else{
+            List<Despesa> despesas = repository.findByDescricaoContainingIgnoreCase(descricao);
+            return DespesaDTO.converterLista(despesas);
+        }
     }
 
     public ResponseEntity<DespesaForm> detalhar(Long id) {
