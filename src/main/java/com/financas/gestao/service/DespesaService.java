@@ -1,18 +1,15 @@
 package com.financas.gestao.service;
 
 import com.financas.gestao.dto.DespesaDTO;
-import com.financas.gestao.dto.DespesaForm;
-import com.financas.gestao.dto.ReceitaDTO;
+import com.financas.gestao.dto.DespesaDetalhes;
 import com.financas.gestao.exception.DespesaJaCadastradaException;
+import com.financas.gestao.exception.DespesaNotFoundException;
 import com.financas.gestao.model.Despesa;
-import com.financas.gestao.model.Receita;
 import com.financas.gestao.repository.DespesaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,14 +18,14 @@ import java.util.Optional;
 public class DespesaService {
 
     @Autowired
-    DespesaRepository repository;
+    private DespesaRepository repository;
 
-    public ResponseEntity<DespesaDTO> cadastrar(DespesaForm despesaForm, UriComponentsBuilder uriBuilder) throws DespesaJaCadastradaException {
-        verificaSeJaExiste(despesaForm);
-        Despesa despesa = despesaForm.converter();
+    @Transactional
+    public Despesa cadastrar(DespesaDetalhes despesaDetalhes) throws DespesaJaCadastradaException {
+        verificaSeJaExiste(despesaDetalhes);
+        Despesa despesa = despesaDetalhes.converter();
         repository.save(despesa);
-        URI uri  = uriBuilder.path("/despesas/{id}").buildAndExpand(despesa.getId()).toUri();
-        return ResponseEntity.created(uri).body(new DespesaDTO(despesa));
+        return despesa;
     }
 
     public List<DespesaDTO> listar(String descricao) {
@@ -41,30 +38,15 @@ public class DespesaService {
         }
     }
 
-    public ResponseEntity<DespesaForm> detalhar(Long id) {
-        Optional<Despesa> despesaOptional = repository.findById(id);
-        return despesaOptional.map(despesa -> ResponseEntity.ok(new DespesaForm(despesa))).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    public ResponseEntity<DespesaForm> atualizar(Long id, DespesaForm despesaForm) {
+    public DespesaDetalhes detalhar(Long id) throws DespesaNotFoundException {
         Optional<Despesa> despesaOptional = repository.findById(id);
         if(despesaOptional.isPresent()){
-            Despesa despesa = despesaForm.atualizar(id, repository);
-            return ResponseEntity.ok(new DespesaForm(despesa));
+            return new DespesaDetalhes(despesaOptional.get());
         }
-        return ResponseEntity.notFound().build();
+        throw new DespesaNotFoundException(id);
     }
 
-    public ResponseEntity<?> deletar(Long id) {
-        Optional<Despesa> despesaOptional = repository.findById(id);
-        if(despesaOptional.isPresent()){
-            repository.deleteById(id);
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    public List<DespesaDTO> listarPorMes(Long ano, Long mes) {
+    public List<Despesa> listarPorMes(Long ano, Long mes) throws DespesaNotFoundException {
         List<Despesa> despesasPorAno = repository.findByDataContaining(ano);
         List<Despesa> despesasPorAnoEMes = new ArrayList<>();
         despesasPorAno.forEach(despesa -> {
@@ -72,11 +54,31 @@ public class DespesaService {
                 despesasPorAnoEMes.add(despesa);
             }
         });
-
-        return DespesaDTO.converterLista(despesasPorAnoEMes);
+        if(!despesasPorAnoEMes.isEmpty()){
+            return despesasPorAnoEMes;
+        }
+        throw new DespesaNotFoundException();
     }
 
-    private void verificaSeJaExiste(DespesaForm despesa) throws DespesaJaCadastradaException {
+    @Transactional
+    public Despesa atualizar(Long id, DespesaDetalhes despesaDetalhes) throws DespesaNotFoundException {
+        Optional<Despesa> despesaOptional = repository.findById(id);
+        if(despesaOptional.isPresent()){
+            return despesaDetalhes.atualizar(id, repository);
+        }
+        throw new DespesaNotFoundException(id);
+    }
+
+    @Transactional
+    public void deletar(Long id) throws DespesaNotFoundException {
+        Optional<Despesa> despesaOptional = repository.findById(id);
+        if(despesaOptional.isPresent()){
+            repository.deleteById(id);
+        }
+        throw new DespesaNotFoundException(id);
+    }
+
+    private void verificaSeJaExiste(DespesaDetalhes despesa) throws DespesaJaCadastradaException {
         Optional<Despesa> despesaEncontrada = repository.findByDescricaoAndData(despesa.getDescricao(), despesa.getData());
         if(despesaEncontrada.isPresent()) {
             throw new DespesaJaCadastradaException();

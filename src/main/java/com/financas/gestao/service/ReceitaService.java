@@ -1,15 +1,15 @@
 package com.financas.gestao.service;
 
 import com.financas.gestao.dto.ReceitaDTO;
+import com.financas.gestao.exception.DespesaNotFoundException;
 import com.financas.gestao.exception.ReceitaJaCadastradaException;
+import com.financas.gestao.exception.ReceitaNotFoundException;
 import com.financas.gestao.model.Receita;
 import com.financas.gestao.repository.ReceitaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,14 +18,14 @@ import java.util.Optional;
 public class ReceitaService {
 
     @Autowired
-    ReceitaRepository repository;
+    private ReceitaRepository repository;
 
-    public ResponseEntity<ReceitaDTO> cadastrar(ReceitaDTO receitaDTO, UriComponentsBuilder uriBuilder) throws ReceitaJaCadastradaException {
+    @Transactional
+    public Receita cadastrar(ReceitaDTO receitaDTO) throws ReceitaJaCadastradaException {
         verificaSeJaExiste(receitaDTO);
         Receita receita = receitaDTO.converter();
         repository.save(receita);
-        URI uri  = uriBuilder.path("/receitas/{id}").buildAndExpand(receita.getId()).toUri();
-        return ResponseEntity.created(uri).body(new ReceitaDTO(receita));
+        return receita;
     }
 
     public List<ReceitaDTO> listar(String descricao) {
@@ -38,30 +38,15 @@ public class ReceitaService {
         }
     }
 
-    public ResponseEntity<ReceitaDTO> detalhar(Long id) {
-        Optional<Receita> receitaOptional = repository.findById(id);
-        return receitaOptional.map(receita -> ResponseEntity.ok(new ReceitaDTO(receita))).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    public ResponseEntity<ReceitaDTO> atualizar(Long id, ReceitaDTO receitaDTO) {
+    public ReceitaDTO detalhar(Long id) throws ReceitaNotFoundException {
         Optional<Receita> receitaOptional = repository.findById(id);
         if(receitaOptional.isPresent()){
-            Receita receita = receitaDTO.atualizar(id, repository);
-            return ResponseEntity.ok(new ReceitaDTO(receita));
+            return new ReceitaDTO(receitaOptional.get());
         }
-        return ResponseEntity.notFound().build();
+        throw new ReceitaNotFoundException(id);
     }
 
-    public ResponseEntity<?> deletar(Long id) {
-        Optional<Receita> receitaOptional = repository.findById(id);
-        if(receitaOptional.isPresent()){
-            repository.deleteById(id);
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    public List<ReceitaDTO> listarPorMes(Long ano, Long mes) {
+    public List<ReceitaDTO> listarPorMes(Long ano, Long mes) throws ReceitaNotFoundException {
         List<Receita> receitasPorAno = repository.findByDataContaining(ano);
         List<Receita> receitasPorAnoEMes = new ArrayList<>();
         receitasPorAno.forEach(receita -> {
@@ -69,8 +54,28 @@ public class ReceitaService {
                 receitasPorAnoEMes.add(receita);
             }
         });
+        if(!receitasPorAnoEMes.isEmpty()){
+            return ReceitaDTO.converterLista(receitasPorAnoEMes);
+        }
+        throw new ReceitaNotFoundException();
+    }
 
-        return ReceitaDTO.converterLista(receitasPorAnoEMes);
+    @Transactional
+    public Receita atualizar(Long id, ReceitaDTO receitaDTO) throws ReceitaNotFoundException {
+        Optional<Receita> receitaOptional = repository.findById(id);
+        if(receitaOptional.isPresent()){
+            return receitaDTO.atualizar(id, repository);
+        }
+        throw new ReceitaNotFoundException(id);
+    }
+
+    @Transactional
+    public void deletar(Long id) throws DespesaNotFoundException {
+        Optional<Receita> receitaOptional = repository.findById(id);
+        if(receitaOptional.isPresent()){
+            repository.deleteById(id);
+        }
+        throw new DespesaNotFoundException(id);
     }
 
     private void verificaSeJaExiste(ReceitaDTO receita) throws ReceitaJaCadastradaException {

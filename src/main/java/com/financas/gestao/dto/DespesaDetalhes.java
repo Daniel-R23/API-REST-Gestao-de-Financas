@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DespesaForm {
+public class DespesaDetalhes {
 
     @NotNull
     @NotEmpty
@@ -33,7 +33,7 @@ public class DespesaForm {
     @Enumerated(EnumType.STRING)
     private Categoria categoria = Categoria.OUTRAS;
 
-    public DespesaForm(Despesa despesa) {
+    public DespesaDetalhes(Despesa despesa) {
         this.descricao = despesa.getDescricao();
         this.valor = despesa.getValor();
         this.data = despesa.getData();

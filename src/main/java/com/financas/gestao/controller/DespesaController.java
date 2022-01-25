@@ -1,18 +1,18 @@
 package com.financas.gestao.controller;
 
 import com.financas.gestao.dto.DespesaDTO;
-import com.financas.gestao.dto.DespesaForm;
-import com.financas.gestao.dto.ReceitaDTO;
+import com.financas.gestao.dto.DespesaDetalhes;
 import com.financas.gestao.exception.DespesaJaCadastradaException;
-import com.financas.gestao.repository.DespesaRepository;
+import com.financas.gestao.exception.DespesaNotFoundException;
+import com.financas.gestao.model.Despesa;
 import com.financas.gestao.service.DespesaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -20,13 +20,13 @@ import java.util.List;
 public class DespesaController {
 
     @Autowired
-    DespesaService despesaService;
-
+    private DespesaService despesaService;
 
     @PostMapping
-    @Transactional
-    public ResponseEntity<DespesaDTO> cadastrar(@RequestBody @Valid DespesaForm despesaForm, UriComponentsBuilder uriBuilder) throws DespesaJaCadastradaException {
-        return despesaService.cadastrar(despesaForm, uriBuilder);
+    public ResponseEntity<DespesaDTO> cadastrar(@RequestBody @Valid DespesaDetalhes despesaDetalhes, UriComponentsBuilder uriBuilder) throws DespesaJaCadastradaException {
+        Despesa despesa = despesaService.cadastrar(despesaDetalhes);
+        URI uri  = uriBuilder.path("/despesas/{id}").buildAndExpand(despesa.getId()).toUri();
+        return ResponseEntity.created(uri).body(new DespesaDTO(despesa));
     }
 
     @GetMapping
@@ -35,25 +35,25 @@ public class DespesaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DespesaForm> detalhar(@PathVariable Long id){
-        return despesaService.detalhar(id);
+    public ResponseEntity<DespesaDetalhes> detalhar(@PathVariable Long id) throws DespesaNotFoundException {
+        DespesaDetalhes despesaDetalhes = despesaService.detalhar(id);
+        return ResponseEntity.ok(despesaDetalhes);
     }
 
     @GetMapping("/{ano}/{mes}")
-    public List<DespesaDTO> listarPorMes(@PathVariable Long ano, @PathVariable Long mes){
-        return  despesaService.listarPorMes(ano,mes);
+    public List<DespesaDTO> listarPorMes(@PathVariable Long ano, @PathVariable Long mes) throws DespesaNotFoundException {
+        return DespesaDTO.converterLista(despesaService.listarPorMes(ano,mes));
     }
 
     @PutMapping("/{id}")
-    @Transactional
-    public ResponseEntity<DespesaForm> atualizar(@PathVariable Long id, @RequestBody @Valid DespesaForm despesaForm){
-        return despesaService.atualizar(id, despesaForm);
+    public ResponseEntity<DespesaDetalhes> atualizar(@PathVariable Long id, @RequestBody @Valid DespesaDetalhes despesaDetalhes) throws DespesaNotFoundException {
+        Despesa despesaAtualizada = despesaService.atualizar(id, despesaDetalhes);
+        return ResponseEntity.ok(new DespesaDetalhes(despesaAtualizada));
     }
 
     @DeleteMapping("/{id}")
-    @Transactional
-    public ResponseEntity<?> deletar(@PathVariable Long id){
-        return despesaService.deletar(id);
+    public void deletar(@PathVariable Long id) throws DespesaNotFoundException {
+        despesaService.deletar(id);
     }
 
 }

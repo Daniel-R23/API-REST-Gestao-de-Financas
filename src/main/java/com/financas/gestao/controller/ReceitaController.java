@@ -1,15 +1,18 @@
 package com.financas.gestao.controller;
 
 import com.financas.gestao.dto.ReceitaDTO;
+import com.financas.gestao.exception.DespesaNotFoundException;
 import com.financas.gestao.exception.ReceitaJaCadastradaException;
+import com.financas.gestao.exception.ReceitaNotFoundException;
+import com.financas.gestao.model.Receita;
 import com.financas.gestao.service.ReceitaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -17,13 +20,14 @@ import java.util.List;
 public class ReceitaController {
 
     @Autowired
-    ReceitaService receitaService;
+    private ReceitaService receitaService;
 
 
     @PostMapping
-    @Transactional
     public ResponseEntity<ReceitaDTO> cadastrar(@RequestBody @Valid ReceitaDTO receitaDTO, UriComponentsBuilder uriBuilder) throws ReceitaJaCadastradaException {
-        return receitaService.cadastrar(receitaDTO, uriBuilder);
+        Receita receita = receitaService.cadastrar(receitaDTO);
+        URI uri  = uriBuilder.path("/receitas/{id}").buildAndExpand(receita.getId()).toUri();
+        return ResponseEntity.created(uri).body(new ReceitaDTO(receita));
     }
 
     @GetMapping
@@ -32,25 +36,25 @@ public class ReceitaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReceitaDTO> detalhar(@PathVariable Long id){
-        return receitaService.detalhar(id);
+    public ResponseEntity<ReceitaDTO> detalhar(@PathVariable Long id) throws ReceitaNotFoundException {
+        ReceitaDTO receitaDTO = receitaService.detalhar(id);
+        return ResponseEntity.ok(receitaDTO);
     }
 
     @GetMapping("/{ano}/{mes}")
-    public List<ReceitaDTO> listarPorMes(@PathVariable Long ano, @PathVariable Long mes){
+    public List<ReceitaDTO> listarPorMes(@PathVariable Long ano, @PathVariable Long mes) throws ReceitaNotFoundException {
         return  receitaService.listarPorMes(ano,mes);
     }
 
     @PutMapping("/{id}")
-    @Transactional
-    public ResponseEntity<ReceitaDTO> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaDTO receitaDTO){
-        return receitaService.atualizar(id, receitaDTO);
+    public ResponseEntity<ReceitaDTO> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaDTO receitaDTO) throws ReceitaNotFoundException {
+        Receita receita = receitaService.atualizar(id, receitaDTO);
+        return ResponseEntity.ok(new ReceitaDTO(receita));
     }
 
     @DeleteMapping("/{id}")
-    @Transactional
-    public ResponseEntity<?> deletar(@PathVariable Long id){
-        return receitaService.deletar(id);
+    public void deletar(@PathVariable Long id) throws DespesaNotFoundException {
+        receitaService.deletar(id);
     }
 
 }
