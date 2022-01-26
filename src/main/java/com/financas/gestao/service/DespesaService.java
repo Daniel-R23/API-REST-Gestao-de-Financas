@@ -74,14 +74,24 @@ public class DespesaService {
         Optional<Despesa> despesaOptional = repository.findById(id);
         if(despesaOptional.isPresent()){
             repository.deleteById(id);
+        }else{
+            throw new DespesaNotFoundException(id);
         }
-        throw new DespesaNotFoundException(id);
     }
 
     private void verificaSeJaExiste(DespesaDetalhes despesa) throws DespesaJaCadastradaException {
-        Optional<Despesa> despesaEncontrada = repository.findByDescricaoAndData(despesa.getDescricao(), despesa.getData());
-        if(despesaEncontrada.isPresent()) {
-            throw new DespesaJaCadastradaException();
+        List<Despesa> despesasComMesmoAno = repository.findByDataContaining((long) despesa.getData().getYear());
+        List<Despesa> despesasComMesmoAnoMesEDescricao = new ArrayList<>();
+        if(!despesasComMesmoAno.isEmpty()){
+            despesasComMesmoAno.forEach(despesaMesmoAno -> {
+                if(despesaMesmoAno.getData().getMonthValue() == despesa.getData().getMonthValue() && despesaMesmoAno.getDescricao().equals(despesa.getDescricao())){
+                    despesasComMesmoAnoMesEDescricao.add(despesaMesmoAno);
+                }
+            });
+            if(!despesasComMesmoAnoMesEDescricao.isEmpty()){
+                throw new DespesaJaCadastradaException();
+            }
         }
+
     }
 }
