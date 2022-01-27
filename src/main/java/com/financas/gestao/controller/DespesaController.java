@@ -35,9 +35,8 @@ public class DespesaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DespesaDetalhes> detalhar(@PathVariable Long id) throws DespesaNotFoundException {
-        DespesaDetalhes despesaDetalhes = despesaService.detalhar(id);
-        return ResponseEntity.ok(despesaDetalhes);
+    public DespesaDetalhes detalhar(@PathVariable Long id) throws DespesaNotFoundException {
+        return despesaService.detalhar(id);
     }
 
     @GetMapping("/{ano}/{mes}")
@@ -46,9 +45,9 @@ public class DespesaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DespesaDetalhes> atualizar(@PathVariable Long id, @RequestBody @Valid DespesaDetalhes despesaDetalhes) throws DespesaNotFoundException {
+    public DespesaDetalhes atualizar(@PathVariable Long id, @RequestBody @Valid DespesaDetalhes despesaDetalhes) throws DespesaNotFoundException {
         Despesa despesaAtualizada = despesaService.atualizar(id, despesaDetalhes);
-        return ResponseEntity.ok(new DespesaDetalhes(despesaAtualizada));
+        return new DespesaDetalhes(despesaAtualizada);
     }
 
     @DeleteMapping("/{id}")

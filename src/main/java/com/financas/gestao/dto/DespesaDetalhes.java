@@ -1,5 +1,8 @@
 package com.financas.gestao.dto;
 
+import com.fasterxml.jackson.databind.JsonSerializable;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.financas.gestao.enums.Categoria;
 import com.financas.gestao.model.Despesa;
 import com.financas.gestao.repository.DespesaRepository;
@@ -28,6 +31,7 @@ public class DespesaDetalhes {
     private Double valor;
 
     @NotNull
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate data;
 
     @Enumerated(EnumType.STRING)
@@ -38,6 +42,12 @@ public class DespesaDetalhes {
         this.valor = despesa.getValor();
         this.data = despesa.getData();
         this.categoria = despesa.getCategoria();
+    }
+
+    public DespesaDetalhes(String desc, Double val, LocalDate data) {
+        this.descricao = desc;
+        this.valor = val;
+        this.data = data;
     }
 
     public Despesa converter() {

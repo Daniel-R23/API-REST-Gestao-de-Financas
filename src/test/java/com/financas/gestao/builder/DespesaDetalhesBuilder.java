@@ -27,8 +27,4 @@ public class DespesaDetalhesBuilder {
     public Despesa toDespesa(){
         return new Despesa(this.descricao, this.valor, this.data, this.categoria);
     }
-
-    public DespesaDetalhes toDespesaDetalhes(){
-        return new DespesaDetalhes(this.toDespesa());
-    }
 }

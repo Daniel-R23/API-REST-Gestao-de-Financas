@@ -2,7 +2,9 @@ package com.financas.gestao.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financas.gestao.builder.DespesaDetalhesBuilder;
+import com.financas.gestao.dto.DespesaDetalhes;
 import com.financas.gestao.model.Despesa;
+import com.financas.gestao.repository.DespesaRepository;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -26,10 +28,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class DespesaServiceTest {
+public class DespesaServiceTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private DespesaRepository repository;
+
 
     private final Despesa despesa = DespesaDetalhesBuilder.builder().build().toDespesa();
     private final String urlGeral = "/despesas";
@@ -84,8 +90,17 @@ class DespesaServiceTest {
 
     @Test
     @Order(5)
-    public void deveriaCriarUmDespesaComACategoriaOutrasCasoEsseCampoNaoForInformado(){
+    public void deveriaCriarUmDespesaComACategoriaOutrasCasoEsseCampoNaoSejaInformado() throws Exception {
+        Despesa despDetalhes = new DespesaDetalhes("desc1", 10D, LocalDate.of(2022,6,25)).converter();
 
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post(urlGeral)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(despDetalhes)))
+                .andExpect(status().is(201));
+
+        repository.save(despDetalhes);
+        assertEquals("OUTRAS", despDetalhes.getCategoria().toString());
     }
 
     @Test

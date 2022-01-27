@@ -36,9 +36,8 @@ public class ReceitaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReceitaDTO> detalhar(@PathVariable Long id) throws ReceitaNotFoundException {
-        ReceitaDTO receitaDTO = receitaService.detalhar(id);
-        return ResponseEntity.ok(receitaDTO);
+    public ReceitaDTO detalhar(@PathVariable Long id) throws ReceitaNotFoundException {
+        return receitaService.detalhar(id);
     }
 
     @GetMapping("/{ano}/{mes}")
@@ -47,9 +46,9 @@ public class ReceitaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReceitaDTO> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaDTO receitaDTO) throws ReceitaNotFoundException {
+    public ReceitaDTO atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaDTO receitaDTO) throws ReceitaNotFoundException {
         Receita receita = receitaService.atualizar(id, receitaDTO);
-        return ResponseEntity.ok(new ReceitaDTO(receita));
+        return new ReceitaDTO(receita);
     }
 
     @DeleteMapping("/{id}")
