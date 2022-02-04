@@ -7,6 +7,7 @@ import com.financas.gestao.exception.DespesaNotFoundException;
 import com.financas.gestao.model.Despesa;
 import com.financas.gestao.service.DespesaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -46,11 +47,11 @@ public class DespesaController {
 
     @PutMapping("/{id}")
     public DespesaDetalhes atualizar(@PathVariable Long id, @RequestBody @Valid DespesaDetalhes despesaDetalhes) throws DespesaNotFoundException {
-        Despesa despesaAtualizada = despesaService.atualizar(id, despesaDetalhes);
-        return new DespesaDetalhes(despesaAtualizada);
+        return despesaService.atualizar(id, despesaDetalhes);
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletar(@PathVariable Long id) throws DespesaNotFoundException {
         despesaService.deletar(id);
     }

@@ -61,10 +61,10 @@ public class DespesaService {
     }
 
     @Transactional
-    public Despesa atualizar(Long id, DespesaDetalhes despesaDetalhes) throws DespesaNotFoundException {
+    public DespesaDetalhes atualizar(Long id, DespesaDetalhes despesaDetalhes) throws DespesaNotFoundException {
         Optional<Despesa> despesaOptional = repository.findById(id);
         if(despesaOptional.isPresent()){
-            return despesaDetalhes.atualizar(id, repository);
+            return new DespesaDetalhes(despesaDetalhes.atualizar(id, repository));
         }
         throw new DespesaNotFoundException(id);
     }

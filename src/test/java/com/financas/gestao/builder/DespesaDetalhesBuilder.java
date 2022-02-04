@@ -1,5 +1,6 @@
 package com.financas.gestao.builder;
 
+import com.financas.gestao.dto.DespesaDTO;
 import com.financas.gestao.dto.DespesaDetalhes;
 import com.financas.gestao.enums.Categoria;
 import com.financas.gestao.model.Despesa;
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 public class DespesaDetalhesBuilder {
 
     @Builder.Default
-    private String descricao = "Despesa feita através do Builder";
+    private String descricao = "Despesa feita atraves do Builder";
 
     @Builder.Default
     private Double valor = 50D;
@@ -25,6 +26,14 @@ public class DespesaDetalhesBuilder {
     private Categoria categoria = Categoria.ALIMENTACAO;
 
     public Despesa toDespesa(){
-        return new Despesa(this.descricao, this.valor, this.data, this.categoria);
+        return new Despesa(1L, this.descricao, this.valor, this.data, this.categoria);
+    }
+
+    public DespesaDetalhes toDespesaDetalhes() {
+        return new DespesaDetalhes(this.toDespesa());
+    }
+
+    public DespesaDTO toDespesaDTO(){
+        return new DespesaDTO(this.toDespesa());
     }
 }
