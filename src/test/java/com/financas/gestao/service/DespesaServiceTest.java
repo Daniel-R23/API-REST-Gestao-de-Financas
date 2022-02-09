@@ -1,251 +1,225 @@
 package com.financas.gestao.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financas.gestao.builder.DespesaDetalhesBuilder;
+import com.financas.gestao.dto.DespesaDTO;
 import com.financas.gestao.dto.DespesaDetalhes;
+import com.financas.gestao.exception.DespesaJaCadastradaException;
+import com.financas.gestao.exception.DespesaNotFoundException;
 import com.financas.gestao.model.Despesa;
 import com.financas.gestao.repository.DespesaRepository;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-@AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DespesaServiceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
+    @Mock
     private DespesaRepository repository;
 
+    @InjectMocks
+    private DespesaService despesaService;
 
-    private final Despesa despesa = DespesaDetalhesBuilder.builder().build().toDespesa();
-    private final String urlGeral = "/despesas";
-    private final String urlId = "/despesas/{id}";
-    private final String urlAnoEMes = "/despesas/{ano}/{mes}";
+    private final DespesaDetalhesBuilder despesa = DespesaDetalhesBuilder.builder().build();
 
     @Test
     @Order(1)
-    public void deveriaRetornar200CasoOsCamposEstejamPreenchidosCorretamente() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .post(urlGeral)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(despesa)))
-                .andExpect(status().is(201));
+    public void deveriaRetornarDespesaAoCadastrar() throws Exception {
+        DespesaDetalhes despesaDetalhes = despesa.toDespesaDetalhes();
+        Despesa despMock = despesa.toDespesa();
+        when(repository.findByDataContaining(anyLong())).thenReturn(List.of());
+        when(repository.save(despMock)).thenReturn(despMock);
+
+        Despesa result = despesaService.cadastrar(despesaDetalhes);
+
+        //assertEquals(despMock.getId(), result.getId());
+        assertEquals(despMock.getDescricao(), result.getDescricao());
+        assertEquals(despMock.getValor(), result.getValor());
+        assertEquals(despMock.getData(), result.getData());
+        assertEquals(despMock.getCategoria(), result.getCategoria());
     }
 
     @Test
     @Order(2)
-    public void deveriaRetornar400CasoHajaUmaDespesaComAMesmaDescricaoNoMesmoMesDoMesmoAno() throws Exception {
-        despesa.setDescricao("desp1");
-        despesa.setData(LocalDate.of(2022,1,1));
-        mockMvc.perform(MockMvcRequestBuilders
-                .post(urlGeral)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(despesa)))
-                .andExpect(status().is(400));
+    public void deveriaRetonrarUmaDespesaComACategoriaOutrasAoCadastrar() throws DespesaJaCadastradaException {
+        DespesaDetalhes despesaDetalhes = new DespesaDetalhes("Descricao", 10D, LocalDate.of(2022, 2, 9));
+
+        Despesa retorno = despesaService.cadastrar(despesaDetalhes);
+
+        assertEquals("OUTRAS", retorno.getCategoria().toString());
     }
 
     @Test
     @Order(3)
-    public void deveriaRetornar400CasoAlgumCampoObrigatorioDaDespesaSejaVazio() throws Exception {
-        despesa.setDescricao("");
+    public void deveriaRetornarUmaDespesaJaCadastradaExceptionAoCadastrar(){
+        DespesaDetalhes despesaDetalhes = despesa.toDespesaDetalhes();
+        Despesa despMock = despesa.toDespesa();
+        when(repository.findByDataContaining(anyLong())).thenReturn(List.of(despMock));
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .post(urlGeral)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(despesa)))
-                .andExpect(status().is(400));
+        DespesaJaCadastradaException e = assertThrows(DespesaJaCadastradaException.class, ()->despesaService.cadastrar(despesaDetalhes));
+        assertEquals("Já existe uma despesa com essa descrição cadastrada no mesmo mês.", e.getDefaultMessage());
     }
 
     @Test
     @Order(4)
-    public void deveriaRetornar400CasoAlgumCampoObrigatorioDaDespesaSejaNulo() throws Exception {
-        despesa.setDescricao(null);
+    public void deveriaRetornarUmaListaDeDespesasAoListar(){
+        List<Despesa> retorno = List.of(despesa.toDespesa());
+        when(repository.findByDescricaoContainingIgnoreCase(despesa.getDescricao())).thenReturn(retorno);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .post(urlGeral)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(despesa)))
-                .andExpect(status().is(400));
+        List<DespesaDTO> result = despesaService.listar(despesa.getDescricao());
+
+        assertEquals(retorno.size(), result.size());
+        assertEquals(retorno.get(0).getDescricao(), result.get(0).getDescricao());
+        assertEquals(retorno.get(0).getData(), result.get(0).getData());
+        assertEquals(retorno.get(0).getValor(), result.get(0).getValor());
+        assertNotNull(result);
     }
 
     @Test
     @Order(5)
-    public void deveriaCriarUmDespesaComACategoriaOutrasCasoEsseCampoNaoSejaInformado() throws Exception {
-        Despesa despDetalhes = new DespesaDetalhes("desc1", 10D, LocalDate.of(2022,6,25)).converter();
+    public void deveriaRetornarTodasAsDespesasAoListar(){
+        List<Despesa> retorno = List.of(despesa.toDespesa());
+        when(repository.findAll()).thenReturn(retorno);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post(urlGeral)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(despDetalhes)))
-                .andExpect(status().is(201));
+        List<DespesaDTO> result = despesaService.listar(null);
 
-        repository.save(despDetalhes);
-        assertEquals("OUTRAS", despDetalhes.getCategoria().toString());
+        assertEquals(retorno.size(), result.size());
+        assertEquals(retorno.get(0).getDescricao(), result.get(0).getDescricao());
+        assertEquals(retorno.get(0).getData(), result.get(0).getData());
+        assertEquals(retorno.get(0).getValor(), result.get(0).getValor());
+        assertNotNull(result);
     }
 
     @Test
     @Order(6)
-    public void deveriaRetornar200ComAListaDeTodasAsDespesasCadastradasCasoADescricaoNaoForInformada() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .get(urlGeral))
-                .andExpect(status().is(200))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    public void deveriaRetornarVazioAoListar() {
+        List<DespesaDTO> result = despesaService.listar("123");
+        List<DespesaDTO> listaVazia = List.of();
+
+        assertEquals(0, result.size());
+        assertEquals(listaVazia, result);
     }
 
     @Test
     @Order(7)
-    public void deveriaRetornar200ComAListaDeTodasAsDepesasCadastradasQueContenhamADescricaoInformada() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .get(urlGeral)
-                .queryParam("descricao", "desc"))
-                .andExpect(status().is(200))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    public void deveriaRetornarUmaDespesaDetalhesAoDetalhar() throws Exception{
+        Long despesaId = despesa.toDespesa().getId();
+        when(repository.findById(despesaId)).thenReturn(Optional.of(despesa.toDespesa()));
+        DespesaDetalhes result = despesaService.detalhar(despesaId);
+
+        assertEquals(despesa.toDespesaDetalhes().getDescricao(),result.getDescricao());
+        assertEquals(despesa.toDespesaDetalhes().getValor(),result.getValor());
+        assertEquals(despesa.toDespesaDetalhes().getCategoria(),result.getCategoria());
+        assertEquals(despesa.toDespesaDetalhes().getData(),result.getData());
     }
 
     @Test
     @Order(8)
-    public void deveriaRetornarVazioCasoNaoHajaNenhumaDespesaCadastradaComADescricaoInformada() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-                        .get(urlGeral)
-                        .queryParam("descricao", "mlk"))
-                .andExpect(status().is(200))
-                .andReturn();
-        String content = result.getResponse().getContentAsString();
+    public void deveriaRetornarUmaDepesaNotFoundExceptionAoDetalhar(){
+        Long despesaId = despesa.toDespesa().getId();
+        when(repository.findById(despesaId)).thenReturn(Optional.empty());
 
-        assertEquals("[]", content);
+        DespesaNotFoundException e = assertThrows(DespesaNotFoundException.class, () -> despesaService.detalhar(despesaId));
+
+        assertEquals("Não foi encontrada nenhuma depesa com o id: 1",e.getMessage());
 
     }
 
     @Test
     @Order(9)
-    public void deveriaRetornar200ComUmaDespesaCasoOIdInformadoSejaValido() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get(urlId,1))
-                .andExpect(status().is(200))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    public void deveriaRetornarUmaListaDeDespesasAoListarPorMeseAno() throws Exception{
+        Long ano = (long)despesa.getData().getYear();
+        Long mes = (long)despesa.getData().getMonthValue();
+        List<Despesa> retorno = List.of(despesa.toDespesa());
+        when(repository.findByDataContaining(ano)).thenReturn(retorno);
+
+        List<Despesa> result = despesaService.listarPorMes(ano, mes);
+
+        assertEquals(retorno.size(), result.size());
+        assertEquals(retorno.get(0).getDescricao(), result.get(0).getDescricao());
+        assertEquals(retorno.get(0).getCategoria(), result.get(0).getCategoria());
+        assertEquals(retorno.get(0).getValor(), result.get(0).getValor());
+        assertEquals(retorno.get(0).getData(), result.get(0).getData());
+
     }
 
     @Test
     @Order(10)
-    public void deveriaRetornar404CasoOIdInformadoSejaInvalido() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .get(urlId, 99))
-                .andExpect(status().is(404));
+    public void deveriaRetonarUmaDespesaNotFoundExceptionAoListarPorMesEAno(){
+        Long ano = (long)despesa.getData().getYear();
+        Long mes = (long)despesa.getData().getMonthValue();
+        when(repository.findByDataContaining(ano)).thenReturn(List.of());
+
+        DespesaNotFoundException e = assertThrows(DespesaNotFoundException.class, () -> despesaService.listarPorMes(ano, mes));
+
+        assertEquals("Nenhuma despesa foi encontrada", e.getMessage());
     }
 
     @Test
     @Order(11)
-    public void deveriaRetornar400CasoOIdInformadoNaoSejaUmNumero() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .get(urlId, "abc"))
-                .andExpect(status().is(400));
+    public void deveriaRetornarUmaDespesaAoAtualizar() throws DespesaNotFoundException {
+        Despesa retorno = despesa.toDespesa();
+        Long despesaId = retorno.getId();
+        when(repository.findById(despesaId)).thenReturn(Optional.of(retorno));
+
+        DespesaDetalhes result = despesaService.atualizar(despesaId, despesa.toDespesaDetalhes());
+
+        assertNotNull(result);
+        assertEquals(retorno.getData(), result.getData());
+        assertEquals(retorno.getDescricao(), result.getDescricao());
+        assertEquals(retorno.getValor(), result.getValor());
+        assertEquals(retorno.getCategoria(), result.getCategoria());
+
     }
 
     @Test
     @Order(12)
-    public void deveriaRetornar200ComAsDespesasReferentesAoMesEAnoInformados() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .get(urlAnoEMes, 2021, 2))
-                .andExpect(status().is(200))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    public void deveriaLancarUmaExcecaoAoAtualizar(){
+        Long despesaIdErrado = 999L;
+        DespesaDetalhes retorno = despesa.toDespesaDetalhes();
+
+        DespesaNotFoundException e = assertThrows(DespesaNotFoundException.class, () -> despesaService.atualizar(despesaIdErrado, retorno));
+
+        assertEquals("Não foi encontrada nenhuma depesa com o id: 999",e.getMessage());
+
     }
 
     @Test
     @Order(13)
-    public void deveriaRetornar404CasoOMesEAnoSejaInvalido() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .get(urlAnoEMes, 99,99))
-                .andExpect(status().is(404));
+    public void deveriaRetornarVazioAoDeletar() throws DespesaNotFoundException {
+        Long despesaId = 1L;
+        Despesa retorno = despesa.toDespesa();
+        when(repository.findById(despesaId)).thenReturn(Optional.of(retorno));
+
+        despesaService.deletar(despesaId);
+
+        verify(repository, times(1)).findById(despesaId);
+        verify(repository, times(1)).deleteById(despesaId);
     }
 
     @Test
     @Order(14)
-    public void deveriaRetornar400CasoOMesEAnoNaoSejamNumeros() throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders
-                .get(urlAnoEMes, "abc", "abc"))
-                .andExpect(status().is(400));
-    }
+    public void deveriaRetornarUmaExcecaoAoDeletar(){
+        Long despesaIdErrado = 999L;
+        when(repository.findById(999L)).thenReturn(Optional.empty());
 
-    @Test
-    @Order(15)
-    public void deveriaRetornar200CasoOIdInformadoSejaValidoQuandoAtualizar() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(urlId, 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(despesa)))
-                .andExpect(status().is(200));
-    }
+        DespesaNotFoundException e = assertThrows(DespesaNotFoundException.class, () -> despesaService.deletar(despesaIdErrado));
 
-    @Test
-    @Order(16)
-    public void deveriaRetornar404CasoOIdInformadoSejaInvalidoQuandoAtualizar() throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(urlId,99)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(despesa)))
-                .andExpect(status().is(404));
-
-    }
-
-    @Test
-    @Order(17)
-    public void deveriaRetornar400CasoOIdInformadoNaoSejaUmNumeroQuandoAtualizar() throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(urlId, "abc")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(despesa)))
-                .andExpect(status().is(400));
-    }
-
-    @Test
-    @Order(18)
-    public void deveriaRetornar200CasoOIdInformadoSejaValido() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .delete(urlId, 1))
-                .andExpect(status().is(200));
-    }
-
-    @Test
-    @Order(19)
-    public void deveriaRetornar404CasoOIdInformadoSejaInvalidoQuandoDeletar() throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders
-                .delete(urlId, 99))
-                .andExpect(status().is(404));
-    }
-
-    @Test
-    @Order(20)
-    public void deveriaRetornar400CasoOIdInformadoNaoSejaUmNumeroQuandoDeletar()throws Exception{
-        mockMvc.perform(MockMvcRequestBuilders
-                .delete(urlId, "abc"))
-                .andExpect(status().is(400));
-    }
-
-    private String asJsonString(Object o) {
-        try{
-            return new ObjectMapper().writeValueAsString(o);
-        }catch (Exception e){
-            throw new RuntimeException(e);
-        }
+        assertEquals("Não foi encontrada nenhuma depesa com o id: 999" ,e.getMessage());
     }
 }
