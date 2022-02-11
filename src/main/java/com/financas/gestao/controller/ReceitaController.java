@@ -1,12 +1,12 @@
 package com.financas.gestao.controller;
 
 import com.financas.gestao.dto.ReceitaDTO;
-import com.financas.gestao.exception.DespesaNotFoundException;
 import com.financas.gestao.exception.ReceitaJaCadastradaException;
 import com.financas.gestao.exception.ReceitaNotFoundException;
 import com.financas.gestao.model.Receita;
 import com.financas.gestao.service.ReceitaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -52,7 +52,8 @@ public class ReceitaController {
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id) throws DespesaNotFoundException {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletar(@PathVariable Long id) throws ReceitaNotFoundException {
         receitaService.deletar(id);
     }
 

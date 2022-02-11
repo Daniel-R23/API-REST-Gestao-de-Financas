@@ -1,7 +1,6 @@
 package com.financas.gestao.service;
 
 import com.financas.gestao.dto.ReceitaDTO;
-import com.financas.gestao.exception.DespesaNotFoundException;
 import com.financas.gestao.exception.ReceitaJaCadastradaException;
 import com.financas.gestao.exception.ReceitaNotFoundException;
 import com.financas.gestao.model.Receita;
@@ -70,18 +69,27 @@ public class ReceitaService {
     }
 
     @Transactional
-    public void deletar(Long id) throws DespesaNotFoundException {
+    public void deletar(Long id) throws ReceitaNotFoundException {
         Optional<Receita> receitaOptional = repository.findById(id);
         if(receitaOptional.isPresent()){
             repository.deleteById(id);
+        }else{
+            throw new ReceitaNotFoundException(id);
         }
-        throw new DespesaNotFoundException(id);
     }
 
     private void verificaSeJaExiste(ReceitaDTO receita) throws ReceitaJaCadastradaException {
-        Optional<Receita> receitaEncontrada = repository.findByDescricaoAndData(receita.getDescricao(), receita.getData());
-        if(receitaEncontrada.isPresent()) {
-            throw new ReceitaJaCadastradaException();
+        List<Receita> receitasComMesmoAno = repository.findByDataContaining((long) receita.getData().getYear());
+        List<Receita> receitasComMesmoAnoEMesEDescricao = new ArrayList<>();
+        if(!receitasComMesmoAno.isEmpty()){
+            receitasComMesmoAno.forEach(receitaComMesmoAno ->{
+                if(receitaComMesmoAno.getData().getMonthValue() == receita.getData().getMonthValue() && receitaComMesmoAno.getDescricao().equals(receita.getDescricao())){
+                    receitasComMesmoAnoEMesEDescricao.add(receitaComMesmoAno);
+                }
+            });
+            if(!receitasComMesmoAnoEMesEDescricao.isEmpty()){
+                throw new ReceitaJaCadastradaException();
+            }
         }
     }
 }
