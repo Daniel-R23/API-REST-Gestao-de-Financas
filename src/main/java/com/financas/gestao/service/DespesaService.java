@@ -29,13 +29,13 @@ public class DespesaService {
     }
 
     public List<DespesaDTO> listar(String descricao) {
+        List<Despesa> despesas;
         if(descricao == null) {
-            List<Despesa> despesas = repository.findAll();
-            return DespesaDTO.converterLista(despesas);
+            despesas = repository.findAll();
         }else{
-            List<Despesa> despesas = repository.findByDescricaoContainingIgnoreCase(descricao);
-            return DespesaDTO.converterLista(despesas);
+            despesas = repository.findByDescricaoContainingIgnoreCase(descricao);
         }
+        return DespesaDTO.converterLista(despesas);
     }
 
     public DespesaDetalhes detalhar(Long id) throws DespesaNotFoundException {

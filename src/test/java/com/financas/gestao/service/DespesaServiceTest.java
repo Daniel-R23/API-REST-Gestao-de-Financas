@@ -23,7 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-
+    
 @ActiveProfiles("test")
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -47,7 +47,6 @@ public class DespesaServiceTest {
 
         Despesa result = despesaService.cadastrar(despesaDetalhes);
 
-        //assertEquals(despMock.getId(), result.getId());
         assertEquals(despMock.getDescricao(), result.getDescricao());
         assertEquals(despMock.getValor(), result.getValor());
         assertEquals(despMock.getData(), result.getData());
@@ -56,7 +55,7 @@ public class DespesaServiceTest {
 
     @Test
     @Order(2)
-    public void deveriaRetonrarUmaDespesaComACategoriaOutrasAoCadastrar() throws DespesaJaCadastradaException {
+    public void deveriaRetornarUmaDespesaComACategoriaOutrasAoCadastrar() throws DespesaJaCadastradaException {
         DespesaDetalhes despesaDetalhes = new DespesaDetalhes("Descricao", 10D, LocalDate.of(2022, 2, 9));
 
         Despesa retorno = despesaService.cadastrar(despesaDetalhes);
@@ -66,7 +65,7 @@ public class DespesaServiceTest {
 
     @Test
     @Order(3)
-    public void deveriaRetornarUmaDespesaJaCadastradaExceptionAoCadastrar(){
+    public void deveriaLancarUmaDespesaJaCadastradaExceptionAoCadastrar(){
         DespesaDetalhes despesaDetalhes = despesa.toDespesaDetalhes();
         Despesa despMock = despesa.toDespesa();
         when(repository.findByDataContaining(anyLong())).thenReturn(List.of(despMock));
@@ -130,7 +129,7 @@ public class DespesaServiceTest {
 
     @Test
     @Order(8)
-    public void deveriaRetornarUmaDepesaNotFoundExceptionAoDetalhar(){
+    public void deveriaLancarUmaDepesaNotFoundExceptionAoDetalhar(){
         Long despesaId = despesa.toDespesa().getId();
         when(repository.findById(despesaId)).thenReturn(Optional.empty());
 
@@ -160,7 +159,7 @@ public class DespesaServiceTest {
 
     @Test
     @Order(10)
-    public void deveriaRetonarUmaDespesaNotFoundExceptionAoListarPorMesEAno(){
+    public void deveriaLancarUmaDespesaNotFoundExceptionAoListarPorMesEAno(){
         Long ano = (long)despesa.getData().getYear();
         Long mes = (long)despesa.getData().getMonthValue();
         when(repository.findByDataContaining(ano)).thenReturn(List.of());
@@ -189,7 +188,7 @@ public class DespesaServiceTest {
 
     @Test
     @Order(12)
-    public void deveriaLancarUmaExcecaoAoAtualizar(){
+    public void deveriaLancarUmaDespesaNotFoundExceptionAoAtualizar(){
         Long despesaIdErrado = 999L;
         DespesaDetalhes retorno = despesa.toDespesaDetalhes();
 
@@ -214,7 +213,7 @@ public class DespesaServiceTest {
 
     @Test
     @Order(14)
-    public void deveriaRetornarUmaExcecaoAoDeletar(){
+    public void deveriaLancarUmaDespesaNotFoundExceptionAoDeletar(){
         Long despesaIdErrado = 999L;
         when(repository.findById(999L)).thenReturn(Optional.empty());
 

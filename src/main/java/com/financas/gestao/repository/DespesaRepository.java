@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DespesaRepository extends JpaRepository<Despesa, Long> {
-    Optional<Despesa> findByDescricaoAndData(String descricao, LocalDate data);
 
     List<Despesa> findByDescricaoContainingIgnoreCase(String descricao);
 
