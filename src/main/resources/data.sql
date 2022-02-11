@@ -1,3 +1,5 @@
+INSERT INTO USUARIO(nome, email, senha) VALUES('Administrador', 'admin@gmail.com', '$2a$10$yUdTDIxBvLqh8eFA5RNZau3ZieMb5ji.hAbaOyfOwv/VNKq2jEDmW')
+
 INSERT INTO RECEITA(descricao, valor, data) VALUES('rec1', '10', '2022-01-17')
 INSERT INTO RECEITA(descricao, valor, data) VALUES('rec2', '10', '2022-02-17')
 INSERT INTO RECEITA(descricao, valor, data) VALUES('rec3', '10', '2022-03-17')
