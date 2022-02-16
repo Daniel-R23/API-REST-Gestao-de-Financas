@@ -1,15 +1,1 @@
 INSERT INTO USUARIO(nome, email, senha) VALUES('Administrador', 'admin@gmail.com', '$2a$10$yUdTDIxBvLqh8eFA5RNZau3ZieMb5ji.hAbaOyfOwv/VNKq2jEDmW')
-
-INSERT INTO RECEITA(descricao, valor, data) VALUES('rec1', '10', '2022-01-17')
-INSERT INTO RECEITA(descricao, valor, data) VALUES('rec2', '10', '2022-02-17')
-INSERT INTO RECEITA(descricao, valor, data) VALUES('rec3', '10', '2022-03-17')
-INSERT INTO RECEITA(descricao, valor, data) VALUES('rec4', '10', '2021-01-17')
-INSERT INTO RECEITA(descricao, valor, data) VALUES('rec5', '10', '2021-02-17')
-INSERT INTO RECEITA(descricao, valor, data) VALUES('rec6', '10', '2021-03-17')
-
-INSERT INTO DESPESA(descricao, valor, data, categoria) VALUES('desp1', '10', '2022-01-17', 'ALIMENTACAO')
-INSERT INTO DESPESA(descricao, valor, data, categoria) VALUES('desp2', '10', '2022-02-17','SAUDE')
-INSERT INTO DESPESA(descricao, valor, data, categoria) VALUES('desp3', '10', '2022-03-17','MORADIA')
-INSERT INTO DESPESA(descricao, valor, data, categoria) VALUES('desp4', '10', '2021-01-17','OUTRAS')
-INSERT INTO DESPESA(descricao, valor, data, categoria) VALUES('desp5', '10', '2021-02-17','OUTRAS')
-INSERT INTO DESPESA(descricao, valor, data, categoria) VALUES('desp6', '10', '2021-03-17','LAZER')
