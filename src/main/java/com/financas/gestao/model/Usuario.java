@@ -3,6 +3,7 @@ package com.financas.gestao.model;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -26,6 +27,14 @@ public class Usuario implements UserDetails {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Perfil> perfis= new ArrayList<>();
+
+    public Usuario(String nome, String email, String senha) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.nome = nome;
+        this.email = email;
+        this.senha = encoder.encode(senha);
+    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

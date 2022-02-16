@@ -1,7 +1,9 @@
 package com.financas.gestao.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Entity;
@@ -19,7 +21,6 @@ public class Perfil implements GrantedAuthority {
     private Long id;
 
     private String nome;
-
 
     @Override
     public String getAuthority() {
